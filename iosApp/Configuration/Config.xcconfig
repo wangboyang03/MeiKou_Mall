@@ -1,0 +1,7 @@
+TEAM_ID=
+
+PRODUCT_NAME=Meikou_Mall
+PRODUCT_BUNDLE_IDENTIFIER=cn.itcast.kotlin_multiplatform_meikou_mall.Meikou_Mall$(TEAM_ID)
+
+CURRENT_PROJECT_VERSION=1
+MARKETING_VERSION=1.0
