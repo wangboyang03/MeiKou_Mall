@@ -15,7 +15,7 @@ import cn.itcast.kotlin_multiplatform_meikou_mall.router.NavigatorHost
 @Composable @Preview fun App() {
   MaterialTheme {
     val controller = rememberNavController()
-    Column(Modifier.background(MaterialTheme.colorScheme.primaryContainer).safeContentPadding().fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(Modifier.background(MaterialTheme.colorScheme.background).safeContentPadding().fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
       NavigatorHost(controller)
     }
   }
