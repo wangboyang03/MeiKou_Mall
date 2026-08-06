@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 import cn.itcast.kotlin_multiplatform_meikou_mall.views.Index
 import cn.itcast.kotlin_multiplatform_meikou_mall.views.login.LoginScreen
 
-@Composable fun NavigatorHost(controller: NavHostController) {
+@Composable fun NavigationHost(controller: NavHostController) {
   NavHost(controller, RouterMap.Index.route) {
     composable(RouterMap.Index.route) {
       Index()

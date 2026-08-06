@@ -61,16 +61,16 @@ import kotlin.repeat
     }
 
     Row(Modifier.fillMaxWidth().height(60.dp)) {
-      repeat(tabList.size) {
+      repeat(tabList.size) { currentIndex ->
         // 循环创建四个上图下字的item
         Column(Modifier.weight(1f).clickable {
           scope.launch {
-            pageState.scrollToPage(it)
+            pageState.scrollToPage(currentIndex)
           }
         }, horizontalAlignment = Alignment.CenterHorizontally) {
-          Image(painterResource(if (it == pageState.currentPage) tabList.get(it).activatedIcon else tabList.get(it).inactiveIcon), null, Modifier.size(30.dp))
+          Image(painterResource(if (currentIndex == pageState.currentPage) tabList[currentIndex].activatedIcon else tabList[currentIndex].inactiveIcon), null, Modifier.size(30.dp))
           Spacer(Modifier.height(5.dp)) // 上下间距
-          Text(tabList.get(it).label, fontSize = 14.sp)
+          Text(tabList[currentIndex].label, fontSize = 14.sp)
         }
       }
     }

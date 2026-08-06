@@ -10,13 +10,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import cn.itcast.kotlin_multiplatform_meikou_mall.router.NavigatorHost
+import cn.itcast.kotlin_multiplatform_meikou_mall.router.NavigationHost
 
 @Composable @Preview fun App() {
   MaterialTheme {
     val controller = rememberNavController()
-    Column(Modifier.background(MaterialTheme.colorScheme.background).safeContentPadding().fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-      NavigatorHost(controller)
+    Column(Modifier.background(MaterialTheme.colorScheme.onTertiary).safeContentPadding().fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+      NavigationHost(controller)
     }
   }
 }
