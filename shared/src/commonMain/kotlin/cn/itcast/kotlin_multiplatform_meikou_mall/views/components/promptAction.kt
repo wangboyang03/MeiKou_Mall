@@ -9,10 +9,17 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,22 +47,45 @@ object PromptAction {
   fun closeToast() {
     _event.tryEmit(CommonEvent.ToastEvent(ToastOptions("")))
   }
-  fun showLoading() {}
+  fun showLoading(options: LoadingOptions? = null): () -> Unit {
+    _event.tryEmit(CommonEvent.LoadingEvent(
+      when(options != null) {
+        true -> options.copy(showLoading = true)
+        else -> LoadingOptions(showLoading = true)
+      }
+    ))
+    return {
+      _event.tryEmit(CommonEvent.LoadingEvent(
+        when(options != null) {
+          true -> options.copy(showLoading = false)
+          else -> LoadingOptions(showLoading = false)
+        }
+      ))
+    }
+  }
   fun showAlertDialog() {}
 }
 
 sealed interface CommonEvent {
   class ToastEvent(val options: ToastOptions): CommonEvent
-  class LoadingEvent(): CommonEvent
+  class LoadingEvent(val options: LoadingOptions? = LoadingOptions()): CommonEvent // options需要默认实现LoadingOptions()
   class MessageEvent(): CommonEvent
 }
 
 // 声明Toast需要的参数对象
 data class ToastOptions(
   val message: String,
-  val color: Color = Color.White,
+  val foregroundColor: Color = Color.White,
   val backgroundColor: Color = Color(0xB31D1B1B),
   val duration: Long = 5000L
+)
+
+// 声明Loading需要的参数对象
+data class LoadingOptions(
+  val message: String = "正在加载中...",
+  val foregroundColor: Color = Color.White,
+  val backgroundColor: Color = Color(0xB31D1B1B),
+  val showLoading: Boolean = false
 )
 
 // 组件类型枚举
@@ -73,16 +103,32 @@ enum class DialogType {
   // 声明当前弹窗类型 确保重组状态不丢失的状态变量
   var currentType by remember { mutableStateOf<DialogType>(DialogType.NONE) }
   var toastOptions by remember { mutableStateOf<ToastOptions?>(null) }
+  var loadingOptions by remember { mutableStateOf<LoadingOptions?>(null) }
 
   LaunchedEffect(Unit) {
     // 在副作用中收集发射出来的事件流
     PromptAction.event.collect {
+      // 分发事件流到CommonEvent的具体实现
       when (it) {
         is CommonEvent.ToastEvent -> {
           currentType = if (it.options.message.isBlank()) DialogType.NONE else DialogType.TOAST
           toastOptions = it.options
         }
-        is CommonEvent.LoadingEvent -> {}
+        is CommonEvent.LoadingEvent -> {
+          val options = it.options ?: return@collect // 取出options参数 因为前面为option声明可选签名
+          // 通过猫耳操作符避免未传值到的的空指针
+          it.options.showLoading.let {
+            when (it) {
+              true -> {
+                currentType = DialogType.LOADING
+                loadingOptions =options
+              }
+              else -> {
+                currentType = DialogType.NONE
+              }
+            }
+          }
+        }
         is CommonEvent.MessageEvent -> {}
       }
     }
@@ -92,6 +138,10 @@ enum class DialogType {
     DialogType.TOAST -> {
       val options = toastOptions ?: return
       Toast(options)
+    }
+    DialogType.LOADING -> {
+      val options = loadingOptions ?: return
+      Loading(options)
     }
     else -> {}
   }
@@ -123,7 +173,17 @@ enum class DialogType {
         animationSpec = tween(140)
       )
     ) {
-      Text(options.message, Modifier.background(options.backgroundColor, RoundedCornerShape(20.dp)).padding(20.dp, 10.dp), color = options.color)
+      Text(options.message, Modifier.background(options.backgroundColor, RoundedCornerShape(20.dp)).padding(20.dp, 10.dp), color = options.foregroundColor)
+    }
+  }
+}
+
+@Composable fun Loading(options: LoadingOptions) {
+  Box(Modifier.fillMaxSize(), Alignment.Center) {
+    Column(Modifier.width(160.dp).aspectRatio(1f).background(options.backgroundColor, RoundedCornerShape(20.dp)), Arrangement.Center, Alignment.CenterHorizontally) {
+      CircularProgressIndicator(color = options.foregroundColor)
+      Spacer(Modifier.height(10.dp))
+      Text(options.message, color = options.foregroundColor)
     }
   }
 }
