@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -70,10 +71,17 @@ import kotlin.collections.chunked
   val inVogueGoods = emptyList<GoodsItem>()
   val oneStopGoods = emptyList<GoodsItem>()*/
 
-  LazyColumn(
-    modifier = Modifier
-      .fillMaxSize()
-      .background(Color(0xFFF2F3F5)),
+  val lazyListState = rememberLazyListState()
+  val vm: HomePageViewModel = viewModel()
+
+  // @State @Watch()
+  LaunchedEffect(lazyListState.canScrollForward, state.loading, state.recommendGoods.size) {
+    if (!state.loading && state.recommendGoods.isNotEmpty() && !lazyListState.canScrollForward) {
+      vm.loadRecommendMoreData()
+    }
+  }
+
+  LazyColumn(Modifier.fillMaxSize().background(Color(0xFFF2F3F5)), lazyListState,
     contentPadding = PaddingValues(bottom = 84.dp),
     verticalArrangement = Arrangement.spacedBy(6.dp),
   ) {

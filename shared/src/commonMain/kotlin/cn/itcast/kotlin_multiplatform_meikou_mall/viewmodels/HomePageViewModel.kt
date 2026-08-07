@@ -7,6 +7,7 @@ import cn.itcast.kotlin_multiplatform_meikou_mall.models.homepage.Banner
 import cn.itcast.kotlin_multiplatform_meikou_mall.models.homepage.CategoryItem
 import cn.itcast.kotlin_multiplatform_meikou_mall.models.homepage.GoodsItem
 import cn.itcast.kotlin_multiplatform_meikou_mall.models.homepage.HotResult
+import cn.itcast.kotlin_multiplatform_meikou_mall.views.components.LoadingOptions
 import cn.itcast.kotlin_multiplatform_meikou_mall.views.components.PromptAction
 import cn.itcast.kotlin_multiplatform_meikou_mall.views.components.ToastOptions
 import kotlinx.coroutines.async
@@ -28,7 +29,7 @@ data class HomeViewState(
   val isRefreshing: Boolean = false,
   val error: String? = null,
   val recommendPage: Int = 1,
-  val recommendPages: Int = 1,
+  val recommendPages: Int = 8,
   val recommendFinished: Boolean = false,
   val recommendLoading: Boolean = false,
 )
@@ -135,6 +136,37 @@ class HomePageViewModel: ViewModel() {
       } finally {
         _homepageState.update {
           it.copy(loading = false)
+        }
+        close()
+      }
+    }
+  }
+
+  fun loadRecommendMoreData() {
+    viewModelScope.launch {
+      if (_homepageState.value.recommendLoading || _homepageState.value.recommendFinished) return@launch
+      // 没有正在加载且还有更多数据
+      _homepageState.update {
+        it.copy(recommendLoading = true) // 阀门控制
+      }
+      val close = PromptAction.showLoading(LoadingOptions("正在加载更多..."))
+
+      val currentPage = _homepageState.value.recommendPage +1 // 页码+1 得到当前需要请求的页码
+      val allDataCount = currentPage * _homepageState.value.recommendPages // 获取到的总数量
+
+      try {
+        val response = HomePageApi.getRecommend(allDataCount)
+        _homepageState.update {
+          it.copy(recommendGoods = response, recommendPage = currentPage, recommendFinished = response.size < allDataCount,)
+        }
+      } catch (error: Exception) {
+        error.message?.let {
+          PromptAction.showToast(ToastOptions(it))
+        }
+        error.printStackTrace()
+      } finally {
+        _homepageState.update {
+          it.copy(recommendLoading = false)
         }
         close()
       }
