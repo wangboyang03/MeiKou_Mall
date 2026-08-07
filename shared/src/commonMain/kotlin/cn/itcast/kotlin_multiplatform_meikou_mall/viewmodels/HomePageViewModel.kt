@@ -9,6 +9,7 @@ import cn.itcast.kotlin_multiplatform_meikou_mall.models.homepage.GoodsItem
 import cn.itcast.kotlin_multiplatform_meikou_mall.models.homepage.HotResult
 import cn.itcast.kotlin_multiplatform_meikou_mall.views.components.PromptAction
 import cn.itcast.kotlin_multiplatform_meikou_mall.views.components.ToastOptions
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -42,16 +43,41 @@ class HomePageViewModel: ViewModel() {
 
   fun getHomeDataFormApi() {
     viewModelScope.launch {
+      val close = PromptAction.showLoading()
       try {
         when (_homepageState.value.loading) {
           true -> return@launch
           else -> {
+            // 阀门控制 避免多次请求
             _homepageState.update {
               it.copy(loading = true)
             }
-            val response = HomePageApi.getBanners()
+            var errors = mutableListOf<String>() // 存放所有的错误信息列表
+
+            // 轮播图并行请求
+            val bannersAsync = async {
+              runCatching {
+                HomePageApi.getBanners()
+              }.onFailure {
+                errors += it.message ?: "轮播图请求失败"
+              }.getOrDefault(emptyList())
+            }
+
+            // 分类列表并行请求
+            val categoriesAsync = async {
+              runCatching {
+                HomePageApi.getCategories()
+              }.onFailure {
+                errors += it.message ?: "分类列表请求失败"
+              }.getOrDefault(emptyList())
+            }
+
+            val bannersResponse = bannersAsync.await()
+            val categoriesResponse = categoriesAsync.await()
+
+            // 统一刷新数据
             _homepageState.update {
-              it.copy(banners = response)
+              it.copy(bannersResponse, categoriesResponse)
             }
           }
         }
@@ -62,6 +88,7 @@ class HomePageViewModel: ViewModel() {
         _homepageState.update {
           it.copy(loading = false)
         }
+        close()
       }
     }
   }
