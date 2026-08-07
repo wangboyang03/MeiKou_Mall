@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.getOrDefault
 
 data class HomeViewState(
   val banners: List<Banner> = emptyList(),
@@ -52,7 +53,7 @@ class HomePageViewModel: ViewModel() {
             _homepageState.update {
               it.copy(loading = true)
             }
-            var errors = mutableListOf<String>() // 存放所有的错误信息列表
+            val errors = mutableListOf<String>() // 存放所有的错误信息列表
 
             // 轮播图并行请求
             val bannersAsync = async {
@@ -72,12 +73,59 @@ class HomePageViewModel: ViewModel() {
               }.getOrDefault(emptyList())
             }
 
+            // 特惠推荐并行请求
+            val hotResultAsync = async {
+              runCatching {
+                HomePageApi.getHotResult()
+              }.onFailure {
+                errors += it.message ?: "特惠推荐请求失败"
+              }.getOrNull()
+            }
+
+            // 爆款推荐并行请求
+            val inVogueAsync = async {
+              runCatching {
+                HomePageApi.getInVogue()
+              }.onFailure {
+                errors += it.message ?: "爆款推荐请求失败"
+              }.getOrNull()
+            }
+
+            val oneStopAsync = async {
+              runCatching {
+                HomePageApi.getOneStop()
+              }.onFailure {
+                errors += it.message ?: "一站买全请求失败"
+              }.getOrNull()
+            }
+
+            val newGoodsAsync = async {
+              runCatching {
+                HomePageApi.getNewGoods()
+              }.onFailure {
+                errors += it.message ?: "新潮好物请求失败"
+              }.getOrDefault(emptyList())
+            }
+
+            val recommendGoodsAsync = async {
+              runCatching {
+                HomePageApi.getRecommend()
+              }.onFailure {
+                errors += it.message ?: "猜你喜欢请求失败"
+              }.getOrDefault(emptyList())
+            }
+
             val bannersResponse = bannersAsync.await()
             val categoriesResponse = categoriesAsync.await()
+            val hotResultResponse = hotResultAsync.await()
+            val inVogueResponse = inVogueAsync.await()
+            val oneStopResponse = oneStopAsync.await()
+            val newGoodsResponse = newGoodsAsync.await()
+            val recommendGoodsResponse = recommendGoodsAsync.await()
 
             // 统一刷新数据
             _homepageState.update {
-              it.copy(bannersResponse, categoriesResponse)
+              it.copy(bannersResponse, categoriesResponse, hotResultResponse, inVogueResponse, oneStopResponse, newGoodsResponse, recommendGoodsResponse)
             }
           }
         }
