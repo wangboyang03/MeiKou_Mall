@@ -63,12 +63,12 @@ import kotlin.collections.chunked
 
 @Composable fun HomeScreen(state: HomeViewState, onSearchClick: () -> Unit = {}, onGoodsClick: (String) -> Unit = {}, ) {
 
-  /*val preferenceGoods = state.hotResult.goods().take(4)
+  val preferenceGoods = state.hotResult.goods().take(4)
   val inVogueGoods = state.inVogue.goods().take(4)
-  val oneStopGoods = state.oneStop.goods().take(4)*/
-  val preferenceGoods = emptyList<GoodsItem>()
+  val oneStopGoods = state.oneStop.goods().take(4)
+  /*val preferenceGoods = emptyList<GoodsItem>()
   val inVogueGoods = emptyList<GoodsItem>()
-  val oneStopGoods = emptyList<GoodsItem>()
+  val oneStopGoods = emptyList<GoodsItem>()*/
 
   LazyColumn(
     modifier = Modifier
@@ -85,14 +85,14 @@ import kotlin.collections.chunked
       )
     }
 
-    /*item {
+    item {
       PreferenceSection(
         title = state.hotResult?.title.orEmpty().ifBlank { "特惠推荐" },
         goodsList = preferenceGoods,
         onGoodsClick = onGoodsClick,
       )
     }
-
+//
     item {
       DualSection(
         leftTitle = state.inVogue?.title.orEmpty().ifBlank { "爆款推荐" },
@@ -104,20 +104,20 @@ import kotlin.collections.chunked
         onGoodsClick = onGoodsClick,
       )
     }
-
+//
     item {
       NewGoodsSection(
         goodsList = state.newGoods,
         onGoodsClick = onGoodsClick,
       )
     }
-
+//
     item {
       RecommendSection(
         goodsList = state.recommendGoods,
         onGoodsClick = onGoodsClick,
       )
-    }*/
+    }
   }
 }
 
@@ -336,11 +336,7 @@ private fun CategorySection(categories: List<CategoryItem>) {
 }
 
 @Composable
-private fun PreferenceSection(
-  title: String,
-  goodsList: List<GoodsItem>,
-  onGoodsClick: (String) -> Unit,
-) {
+private fun PreferenceSection(title: String, goodsList: List<GoodsItem>, onGoodsClick: (String) -> Unit) {
   Column(
     modifier = Modifier
       .fillMaxWidth()
@@ -363,23 +359,25 @@ private fun PreferenceSection(
         .height(180.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      PromotionPoster(
-        goods = goodsList.first(),
-        modifier = Modifier
-          .weight(0.72f)
-          .fillMaxHeight(),
-        onClick = {
-          onGoodsClick(goodsList.first().id)
-        },
-      )
+      if (goodsList.isNotEmpty()) {
+        PromotionPoster(
+          goods = goodsList.first(),
+          modifier = Modifier
+            .weight(0.72f)
+            .fillMaxHeight(),
+          onClick = {
+            onGoodsClick(goodsList.first().id)
+          }
+        )
 
-      PromotionGoodsPanel(
-        goodsList = goodsList.drop(1).take(3),
-        modifier = Modifier
-          .weight(1.28f)
-          .fillMaxHeight(),
-        onGoodsClick = onGoodsClick,
-      )
+        PromotionGoodsPanel(
+          goodsList = goodsList.drop(1).take(3),
+          modifier = Modifier
+            .weight(1.28f)
+            .fillMaxHeight(),
+          onGoodsClick = onGoodsClick
+        )
+      }
     }
   }
 }
