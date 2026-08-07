@@ -3,6 +3,7 @@ package cn.itcast.kotlin_multiplatform_meikou_mall.views
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,11 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,16 +65,21 @@ import kotlin.repeat
       }
     }
 
-    Row(Modifier.fillMaxWidth().navigationBarsPadding().height(70.dp)) {
+    Row(Modifier.fillMaxWidth().navigationBarsPadding().height(85.dp)) {
       repeat(tabList.size) { currentIndex ->
         // 循环创建四个上图下字的item
-        Column(Modifier.weight(1f).padding(top = 10.dp).clickable {
-          scope.launch {
-            pageState.scrollToPage(currentIndex)
+        Column(Modifier.weight(1f).padding(top = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+          Box(Modifier.size(width = 100.dp, height = 48.dp).clip(RoundedCornerShape(24.dp)).background(if (currentIndex == pageState.currentPage) Color(0xFFE0E0F8) else Color.Transparent)
+              .clickable {
+                scope.launch {
+                  pageState.scrollToPage(currentIndex)
+                }
+              },
+            contentAlignment = Alignment.Center,
+          ) {
+            Image(painterResource(if (currentIndex == pageState.currentPage) tabList[currentIndex].activatedIcon else tabList[currentIndex].inactiveIcon), null, Modifier.size(30.dp))
           }
-        }, horizontalAlignment = Alignment.CenterHorizontally) {
-          Image(painterResource(if (currentIndex == pageState.currentPage) tabList[currentIndex].activatedIcon else tabList[currentIndex].inactiveIcon), null, Modifier.size(30.dp))
-          Spacer(Modifier.height(5.dp)) // 上下间距
+          Spacer(Modifier.height(4.dp)) // 上下间距
           Text(tabList[currentIndex].label, fontSize = 14.sp)
         }
       }
