@@ -172,4 +172,13 @@ class HomePageViewModel: ViewModel() {
       }
     }
   }
+
+  fun refreshingHomeData() {
+    // 先把状态重置回去
+    _homepageState.update {
+      it.copy(loading = false, recommendPage = 1, recommendFinished = false)
+    }
+    // 然后调用首页数据获取方法
+    getHomeDataFormApi()
+  }
 }

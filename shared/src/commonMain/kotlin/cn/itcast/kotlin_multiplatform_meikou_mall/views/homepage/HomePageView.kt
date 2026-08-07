@@ -26,6 +26,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,6 +74,7 @@ import kotlin.collections.chunked
   val oneStopGoods = emptyList<GoodsItem>()*/
 
   val lazyListState = rememberLazyListState()
+  val pullToRefreshState = rememberPullToRefreshState()
   val vm: HomePageViewModel = viewModel()
 
   // @State @Watch()
@@ -81,50 +84,54 @@ import kotlin.collections.chunked
     }
   }
 
-  LazyColumn(Modifier.fillMaxSize().background(Color(0xFFF2F3F5)), lazyListState,
-    contentPadding = PaddingValues(bottom = 84.dp),
-    verticalArrangement = Arrangement.spacedBy(6.dp),
-  ) {
-    item {
-      HomeTopSection(
-        banners = state.banners,
-        categories = state.categories,
-        onSearchClick = onSearchClick,
-      )
-    }
+  Box(Modifier.fillMaxSize().pullToRefresh(state.isRefreshing, pullToRefreshState, onRefresh = {
+    vm.refreshingHomeData()
+  })) {
+    LazyColumn(Modifier.fillMaxSize().background(Color(0xFFF2F3F5)), lazyListState,
+      contentPadding = PaddingValues(bottom = 84.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      item {
+        HomeTopSection(
+          banners = state.banners,
+          categories = state.categories,
+          onSearchClick = onSearchClick,
+        )
+      }
 
-    item {
-      PreferenceSection(
-        title = state.hotResult?.title.orEmpty().ifBlank { "特惠推荐" },
-        goodsList = preferenceGoods,
-        onGoodsClick = onGoodsClick,
-      )
-    }
+      item {
+        PreferenceSection(
+          title = state.hotResult?.title.orEmpty().ifBlank { "特惠推荐" },
+          goodsList = preferenceGoods,
+          onGoodsClick = onGoodsClick,
+        )
+      }
 //
-    item {
-      DualSection(
-        leftTitle = state.inVogue?.title.orEmpty().ifBlank { "爆款推荐" },
-        leftSubtitle = "24小时热榜",
-        leftGoods = inVogueGoods,
-        rightTitle = state.oneStop?.title.orEmpty().ifBlank { "一站全买" },
-        rightSubtitle = "搞定熊孩子",
-        rightGoods = oneStopGoods,
-        onGoodsClick = onGoodsClick,
-      )
-    }
+      item {
+        DualSection(
+          leftTitle = state.inVogue?.title.orEmpty().ifBlank { "爆款推荐" },
+          leftSubtitle = "24小时热榜",
+          leftGoods = inVogueGoods,
+          rightTitle = state.oneStop?.title.orEmpty().ifBlank { "一站全买" },
+          rightSubtitle = "搞定熊孩子",
+          rightGoods = oneStopGoods,
+          onGoodsClick = onGoodsClick,
+        )
+      }
 //
-    item {
-      NewGoodsSection(
-        goodsList = state.newGoods,
-        onGoodsClick = onGoodsClick,
-      )
-    }
+      item {
+        NewGoodsSection(
+          goodsList = state.newGoods,
+          onGoodsClick = onGoodsClick,
+        )
+      }
 //
-    item {
-      RecommendSection(
-        goodsList = state.recommendGoods,
-        onGoodsClick = onGoodsClick,
-      )
+      item {
+        RecommendSection(
+          goodsList = state.recommendGoods,
+          onGoodsClick = onGoodsClick,
+        )
+      }
     }
   }
 }
