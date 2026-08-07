@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class ResponseData<T>(
   val code: String,
-  val message: String,
+  val msg: String,
   val result: T?
 )

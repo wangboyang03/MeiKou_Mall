@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -60,10 +62,10 @@ import kotlin.repeat
       }
     }
 
-    Row(Modifier.fillMaxWidth().height(60.dp)) {
+    Row(Modifier.fillMaxWidth().navigationBarsPadding().height(70.dp)) {
       repeat(tabList.size) { currentIndex ->
         // 循环创建四个上图下字的item
-        Column(Modifier.weight(1f).clickable {
+        Column(Modifier.weight(1f).padding(top = 10.dp).clickable {
           scope.launch {
             pageState.scrollToPage(currentIndex)
           }

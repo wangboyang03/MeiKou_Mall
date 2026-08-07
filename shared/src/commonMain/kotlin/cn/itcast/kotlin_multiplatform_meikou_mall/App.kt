@@ -3,7 +3,6 @@ package cn.itcast.kotlin_multiplatform_meikou_mall
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -15,7 +14,7 @@ import cn.itcast.kotlin_multiplatform_meikou_mall.views.components.PromptActionC
 @Composable @Preview fun App() {
   MaterialTheme {
     val controller = rememberNavController()
-    Box(Modifier.background(MaterialTheme.colorScheme.onTertiary).safeContentPadding().fillMaxSize()) {
+    Box(Modifier.background(MaterialTheme.colorScheme.onTertiary).fillMaxSize()) {
       NavigationHost(controller)
       PromptActionComponent()
     }
